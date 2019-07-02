@@ -38,7 +38,7 @@ FIELDNAMES = ['image_id', 'image_w','image_h','num_boxes', 'boxes', 'features']
 MIN_BOXES = 10
 MAX_BOXES = 100
 
-def load_image_ids(split_name):
+def load_image_ids(split_name, data_dir):
     ''' Load a list of (path,image_id tuples). Modify this to suit your data locations. '''
     split = []
     if split_name == 'coco_test2014':
@@ -60,7 +60,13 @@ def load_image_ids(split_name):
         for item in json.load(f):
           image_id = int(item['image_id'])
           filepath = os.path.join('/data/visualgenome/', item['url'].split('rak248/')[-1])
-          split.append((filepath,image_id))      
+          split.append((filepath,image_id))
+    elif split_name == 'miniCLEVR':
+      filenames = os.listdir(data_dir)
+      for filename in filenames:
+        image_id = int(filename.split('_')[2][:-4])
+        filepath = os.path.join(data_dir, filename)
+        split.append((filepath,image_id))
     else:
       print 'Unknown split'
     return split
@@ -127,6 +133,9 @@ def parse_args():
                         default='karpathy_train', type=str)
     parser.add_argument('--set', dest='set_cfgs',
                         help='set config keys', default=None,
+                        nargs=argparse.REMAINDER)
+    parser.add_argument('--data_dir',
+                        help='Directory with the images', default=None,
                         nargs=argparse.REMAINDER)
 
     if len(sys.argv) == 1:
@@ -211,7 +220,7 @@ if __name__ == '__main__':
     pprint.pprint(cfg)
     assert cfg.TEST.HAS_RPN
 
-    image_ids = load_image_ids(args.data_split)
+    image_ids = load_image_ids(args.data_split, args.data_dir)
     random.seed(10)
     random.shuffle(image_ids)
     # Split image ids between gpus
