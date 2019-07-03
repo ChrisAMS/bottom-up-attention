@@ -136,7 +136,7 @@ def parse_args():
                         nargs=argparse.REMAINDER)
     parser.add_argument('--data_dir',
                         help='Directory with the images', default=None,
-                        nargs=argparse.REMAINDER)
+                        type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
